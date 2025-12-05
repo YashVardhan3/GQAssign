@@ -27,6 +27,9 @@ async fn main() -> anyhow::Result<()> {
     let switchboard_client = Arc::new(switchboard_client::SwitchboardClient::new(rpc_client.clone()));
     let aggregator = Arc::new(price_aggregator::PriceAggregator::new(100)); // 1% max deviation (100 bps)
     let database = Arc::new(database::Database::new(&pg_url, &redis_url).await?);
+    
+    // Run migrations
+    database.migrate().await?;
 
     let mut oracle_manager = oracle_manager::OracleManager::new(
         pyth_client,
@@ -39,7 +42,7 @@ async fn main() -> anyhow::Result<()> {
     // Replace with actual feed IDs for Devnet/Mainnet
     oracle_manager.add_config(oracle_manager::OracleConfig {
         symbol: "SOL".to_string(),
-        pyth_feed: Pubkey::from_str("J83w4HKfqxwcq3BEMMkPFSppX3gqekly30g5BHvsKnZE").unwrap(), // Devnet SOL/USD
+        pyth_feed: Pubkey::from_str("So11111111111111111111111111111111111111112").unwrap(), // Devnet SOL/USD (Placeholder)
         switchboard_feed: Pubkey::from_str("GvDMxPzN1sCj7L26YDK2HnMRXEQmQ2aemov8YBtPS7vR").unwrap(), // Example
     });
 

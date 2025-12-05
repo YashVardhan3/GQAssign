@@ -26,13 +26,20 @@ impl Database {
         })
     }
 
+    pub async fn migrate(&self) -> Result<()> {
+        sqlx::migrate!("./migrations")
+            .run(&self.pg_pool)
+            .await?;
+        Ok(())
+    }
+
     pub async fn cache_price(&self, symbol: &str, price: &ConsensusPrice) -> Result<()> {
         let mut con = self.redis_client.get_async_connection().await?;
         let key = format!("price:{}", symbol);
         let json = serde_json::to_string(price)?;
         
         // Set with expiry (e.g., 5 seconds) to ensure we don't serve very old data if system crashes
-        con.set_ex(key, json, 5).await?;
+        con.set_ex::<_, _, ()>(key, json, 5).await?;
         Ok(())
     }
 
@@ -48,17 +55,17 @@ impl Database {
     }
 
     pub async fn save_price_history(&self, symbol: &str, price: &ConsensusPrice) -> Result<()> {
-        sqlx::query!(
+        sqlx::query(
             r#"
             INSERT INTO price_history (symbol, price, confidence, timestamp, sources_used)
             VALUES ($1, $2, $3, $4, $5)
-            "#,
-            symbol,
-            price.price,
-            price.confidence,
-            chrono::NaiveDateTime::from_timestamp_opt(price.timestamp, 0),
-            price.sources_used as i32
+            "#
         )
+        .bind(symbol)
+        .bind(price.price)
+        .bind(price.confidence)
+        .bind(chrono::NaiveDateTime::from_timestamp_opt(price.timestamp, 0))
+        .bind(price.sources_used as i32)
         .execute(&self.pg_pool)
         .await?;
         Ok(())

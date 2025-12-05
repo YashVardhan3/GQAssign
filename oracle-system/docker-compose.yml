@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "3030:3030"
+    environment:
+      - SOLANA_RPC_URL=https://api.devnet.solana.com
+      - DATABASE_URL=postgres://postgres:postgres@postgres:5432/oracle_db
+      - REDIS_URL=redis://redis:6379/
+      - RUST_LOG=info
+    depends_on:
+      - postgres
+      - redis
+    restart: on-failure
+
+  postgres:
+    image: postgres:15-alpine
+    ports:
+      - "5433:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=oracle_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6380:6379"
+    volumes:
+      - redis_data:/data
+
+volumes:
+  postgres_data:
+  redis_data:
