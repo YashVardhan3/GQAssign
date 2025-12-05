@@ -1,0 +1,21 @@
+[package]
+name = "oracle-backend"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+tokio = { version = "1.0", features = ["full"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+solana-client = "1.18"
+solana-sdk = "1.18"
+pyth-sdk-solana = "0.10.1"
+redis = { version = "0.24", features = ["tokio-comp"] }
+sqlx = { version = "0.7", features = ["runtime-tokio-rustls", "postgres", "chrono"] }
+warp = "0.3"
+chrono = { version = "0.4", features = ["serde"] }
+dotenv = "0.15"
+log = "0.4"
+env_logger = "0.10"
+anyhow = "1.0"
+futures = "0.3"
